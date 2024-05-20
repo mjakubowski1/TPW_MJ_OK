@@ -1,57 +1,59 @@
-﻿using Logic;
+﻿using System;
 using System.Collections.ObjectModel;
+using Data;
+using Logic;
 
 namespace PresentationModel
 {
     public abstract class ModelAbstractAPI
     {
-        public static ModelAbstractAPI CreateModelAPI(LogicAbstractAPI logicApi = default(LogicAbstractAPI))
-        {
-            return new ModelAPILayer(logicApi);
-        }
-
         public abstract int Width { get; }
         public abstract int Height { get; }
 
-        public abstract ObservableCollection<Ball> CreateBalls(int ballsNumber, int radius);
+        public static ModelAbstractAPI CreateModelAPI(LogicAbstractAPI logicAPI = default(LogicAbstractAPI))
+        {
+            return new ModelAPI(logicAPI);
+        }
         public abstract void CallSimulation();
         public abstract void StopSimulation();
-        public abstract int GetBallAmount();
+        public abstract ObservableCollection<BallService> CreateBalls(int ballsNumber);
+        public abstract int GetBallsAmount();
+
+
     }
-    internal class ModelAPILayer : ModelAbstractAPI
+    public class ModelAPI : ModelAbstractAPI
     {
-        private readonly LogicAbstractAPI logicLayer;
-        public override int Width => logicLayer.Width;
-        public override int Height => logicLayer.Height;
+        private readonly LogicAbstractAPI logicAPI;
+        public override int Width => logicAPI.GetBoardWidth();
+        public override int Height => logicAPI.GetBoardHeight();
 
-        public ModelAPILayer() : this(LogicAbstractAPI.CreateApi()) { }
+        public ModelAPI() : this(LogicAbstractAPI.CreateLogicAPI()) { }
 
-        public ModelAPILayer(LogicAbstractAPI logicApi)
+        public ModelAPI(LogicAbstractAPI logicApi)
         {
-            logicLayer = logicApi ?? LogicAbstractAPI.CreateApi();
+            logicAPI = logicApi ?? LogicAbstractAPI.CreateLogicAPI();
         }
+
 
         public override void CallSimulation()
         {
-            logicLayer.RunSimulation();
+            logicAPI.RunSimulation();
         }
 
         public override void StopSimulation()
         {
-            logicLayer.StopSimulation();
+            logicAPI.StopSimulation();
         }
 
-        public override ObservableCollection<Ball> CreateBalls(int ballsNumber, int radius)
+        public override ObservableCollection<BallService> CreateBalls(int ballsNumber)
         {
-            logicLayer.CreateBalls(ballsNumber, radius);
-            return logicLayer.Balls;
+            logicAPI.CreateBalls(ballsNumber);
+            return logicAPI.Balls;
         }
 
-        public override int GetBallAmount()
+        public override int GetBallsAmount()
         {
-            return logicLayer.Balls.Count;
+            return logicAPI.Balls.Count;
         }
-
-
     }
 }

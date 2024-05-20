@@ -16,7 +16,7 @@
         <Label Content="Balls:" HorizontalAlignment="Left" Margin="5,128,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.751,3.503"/>
         <TextBox Text="{Binding BallsAmount}" x:Name="inputNumber"  HorizontalAlignment="Left" Height="23" Margin="46,131,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="92"/>
         <Button Content="Stop" Command="{Binding ExitClick}" HorizontalAlignment="Left" Margin="10,203,0,0" VerticalAlignment="Top" Height="40" Width="128" Background="IndianRed" FontWeight="Bold"/>
-        <ItemsControl ItemsSource="{Binding BallsGroup,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Margin="164,131,145,38" Background="Gray">
+        <ItemsControl ItemsSource="{Binding BallsList,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Margin="164,131,145,38" Background="Gray">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Canvas/>
@@ -32,7 +32,7 @@
             </ItemsControl.ItemContainerStyle>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Ellipse Width="25" Height="25" Fill="White" Stroke="Aqua" StrokeThickness="2"/>
+                    <Ellipse Width="{Binding Diameter}" Height="{Binding Diameter}" Fill="White" Stroke="Aqua" StrokeThickness="2"/>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>

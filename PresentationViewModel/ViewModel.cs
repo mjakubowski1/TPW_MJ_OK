@@ -1,5 +1,8 @@
-﻿using PresentationModel;
+﻿using Data;
+using Logic;
+using PresentationModel;
 using System.Collections;
+using System.ComponentModel;
 using System.Windows.Input;
 
 namespace PresentationViewModel
@@ -7,63 +10,61 @@ namespace PresentationViewModel
     public class ViewModel : ViewModelBase
     {
 
-        private readonly ModelAbstractAPI modelLayer;
+        private readonly ModelAbstractAPI modelAPI;
+        private int _ballsAmount;
+        private IList _balls;
         private readonly int _width;
         private readonly int _height;
-        private int _amountOfBalls = 10;
-        private IList _balls;
 
-        public ViewModel() : this(ModelAbstractAPI.CreateModelAPI()) { }
-
-        public ViewModel(ModelAbstractAPI modelAbstractAPI)
-        {
-            modelLayer = modelAbstractAPI;
-            _height = modelLayer.Height;
-            _width = modelLayer.Width;
-            ClickButton = new RelayCommand(() => ClickHandler());
-            ExitClick = new RelayCommand(() => ExitClickHandler());
-        }
-
-        public ICommand ClickButton { get; set; }
-        public ICommand ExitClick { get; set; }
-        public int ViewHeight
-        {
-            get { return _height; }
-        }
-        public int ViewWidth
-        {
-            get { return _width; }
-        }
-        private void ClickHandler()
-        {
-            BallsGroup = modelLayer.CreateBalls(_amountOfBalls, 20);
-            modelLayer.CallSimulation();
-        }
-
-        private void ExitClickHandler()
-        {
-            modelLayer.StopSimulation();
-        }
 
         public int BallsAmount
         {
-            get { return _amountOfBalls; }
+            get => _ballsAmount;
             set
             {
-                _amountOfBalls = value;
-                RaisePropertyChanged("Ball Amount");
+                _ballsAmount = value;
+                RaisePropertyChanged("BallsAmount");
             }
         }
-        public IList BallsGroup
+
+        public IList BallsList
         {
             get => _balls;
             set
             {
                 _balls = value;
-                RaisePropertyChanged("BallsGroup");
+                RaisePropertyChanged("BallsList");
             }
         }
 
+        public ViewModel() : this(ModelAbstractAPI.CreateModelAPI()) { }
+        public ViewModel(ModelAbstractAPI modelAbstractAPI)
+        {
+            modelAPI = ModelAbstractAPI.CreateModelAPI();
+            _height = modelAPI.Height;
+            _width = modelAPI.Width;
+            ClickButton = new RelayCommand(OnClickButton);
+            ExitClick = new RelayCommand(OnExitClick);
+
+        }
+
+        public ICommand ClickButton { get; set; }
+        public ICommand ExitClick { get; set; }
+
+        public int Width => _width;
+
+        public int Height => _height;
+
+        private void OnClickButton()
+        {
+            BallsList = modelAPI.CreateBalls(_ballsAmount);
+            modelAPI.CallSimulation();
+        }
+
+        private void OnExitClick()
+        {
+            modelAPI.StopSimulation();
+        }
 
     }
 }
