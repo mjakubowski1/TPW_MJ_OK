@@ -1,122 +1,106 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace Data
 {
-    public class BallData : INotifyPropertyChanged
+    internal class BallData : BallInterface
     {
-        private Vector2 _position;
-        private Vector2 _velocity;
-        private float _speed = 1500;
-        private float _radius;
-        private float _mass;
-        private bool _move = true;
+        private Task task;
+        private bool move = true;
+        private int _radius;
+        private Stopwatch stopWatch;
+        private int _mass;
 
-
-        public BallData(Vector2 position, Vector2 velocity, float radious, float mass)
+        public BallData(float x, float y, int mass, Vector2 velocity, int radious, int id)
         {
-            _position = position;
+            stopWatch = new Stopwatch();
+            Id = id;
+            _position = new Vector2(x, y);
+            this._velocity = velocity;
             _radius = radious;
-            _mass = mass;
-            _velocity = velocity;
+            this._mass = mass;
+            task = Task.Run(Move);
         }
 
+        public event EventHandler? BallChanged;
+
+
+        private Vector2 _position;
 
         public Vector2 Position
         {
             get => _position;
+
             set
             {
                 _position = value;
-                RaisePropertyChanged();
             }
         }
+
+
+        private Vector2 _velocity;
 
         public Vector2 Velocity
         {
             get => _velocity;
-            set => _velocity = value;
+            set
+            {
 
+                _velocity = value;
+
+            }
         }
 
-        public float Speed
-        {
-            get => _speed;
-            set => _speed = value;
-        }
 
-        public float Radius
+        public int Radius
         {
             get => _radius;
-            set => _radius = value;
         }
 
-        public float Mass
+
+        public int Mass
         {
             get => _mass;
-            set => _mass = value;
+            private set { _mass = value; }
         }
 
-        public float X
-        {
-            get { return _position.X; }
-            private set => _position.X = value;
 
-        }
-        public float Y
-        {
-            get { return _position.Y; }
-            private set => _position.Y = value;
-        }
+        public int Id { get; }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-        private readonly object _lockObj = new object();
 
-        private void ChangePosition()
+        private async void Move()
         {
-            Position += new Vector2(_velocity.X * _speed, _velocity.Y * _speed);
-            if (_position.X - 5 <= 0 && +_velocity.X < 0)
+            float time;
+
+            while (move)
             {
-                _velocity = new Vector2(-Velocity.X, Velocity.Y);
-                X += 4 * _velocity.X * _speed;
-            }
-            if (_position.X >= DataAbstractAPI.BoardWidth - _radius * 2 && _velocity.X > 0)
-            {
-                _velocity = new Vector2(-Velocity.X, Velocity.Y);
-                X += 4 * _velocity.X * _speed;
-            }
-            if (_position.Y - 5 <= 0 && _velocity.Y < 0)
-            {
-                _velocity = new Vector2(Velocity.X, -Velocity.Y);
-                Y += 4 * _velocity.Y * _speed;
-            }
-            if (_position.Y >= DataAbstractAPI.BoardHeight - _radius * 2 && _velocity.Y > 0)
-            {
-                _velocity = new Vector2(Velocity.X, -Velocity.Y);
-                Y += 4 * _velocity.Y * _speed;
+                stopWatch.Restart();
+                stopWatch.Start();
+                time = (2 / _velocity.Length());
+                UpdatePosition(time);
+
+                stopWatch.Stop();
+                await Task.Delay(time - stopWatch.ElapsedMilliseconds < 0 ? 0 : (int)(time - stopWatch.ElapsedMilliseconds));
             }
 
-
-            RaisePropertyChanged(nameof(Position));
-
         }
 
-        public void UpdatePosition()
+
+        private void UpdatePosition(float time)
         {
-            ChangePosition();
+            Position += _velocity * time;
+            BallChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        protected virtual void RaisePropertyChanged(params string[] propertyNames)
+        public void Dispose()
         {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (handler != null)
-            {
-                foreach (string propertyName in propertyNames)
-                {
-                    handler(this, new PropertyChangedEventArgs(propertyName));
-                }
-            }
+            move = false;
+            task.Wait();
+            task.Dispose();
         }
+
     }
+
 }

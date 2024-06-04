@@ -1,53 +1,77 @@
-﻿using Data;
-using System.Collections.ObjectModel;
-using System.Numerics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace Data.Tests
 {
     [TestClass]
     public class DataAbstractAPITests
     {
-        [TestMethod]
-        public void GetBallData_ReturnsValidBallData()
+        private DataAbstractAPI _dataAPI;
+
+        [TestInitialize]
+        public void TestInitialize()
         {
-            DataAbstractAPI dataAPI = DataAbstractAPI.CreateDataAPI();
-            Vector2 position = new Vector2(100, 200);
-            Vector2 velocity = new Vector2(0.1f, -0.2f);
-            float radius = 10f;
-            float mass = 5f;
-
-            BallData ballData = dataAPI.GetBallData(position, velocity, radius, mass);
-
-            Assert.IsNotNull(ballData);
-            Assert.AreEqual(position, ballData.Position);
-            Assert.AreEqual(velocity, ballData.Velocity);
-            Assert.AreEqual(radius, ballData.Radius);
-            Assert.AreEqual(mass, ballData.Mass);
+            _dataAPI = DataAbstractAPI.CreateDataAPI(750, 400);
         }
 
-        [TestMethod]
-        public void CreateDataAPI_ReturnsValidDataAPIInstance()
+        [TestCleanup]
+        public void TestCleanup()
         {
-            DataAbstractAPI dataAPI = DataAbstractAPI.CreateDataAPI();
-
-            Assert.IsNotNull(dataAPI);
+            _dataAPI.RemoveBalls();
         }
 
         [TestMethod]
         public void BoardWidth_ReturnsCorrectValue()
         {
-            int boardWidth = DataAbstractAPI.BoardWidth;
+            int expectedWidth = 750;
 
-            Assert.AreEqual(750, boardWidth);
+            int actualWidth = _dataAPI.BoardWidth;
+
+            Assert.AreEqual(expectedWidth, actualWidth);
         }
 
         [TestMethod]
         public void BoardHeight_ReturnsCorrectValue()
         {
-            int boardHeight = DataAbstractAPI.BoardHeight;
+            int expectedHeight = 400;
 
-            Assert.AreEqual(400, boardHeight);
+            int actualHeight = _dataAPI.BoardHeight;
+
+            Assert.AreEqual(expectedHeight, actualHeight);
+        }
+
+        [TestMethod]
+        public void GetBallAmount_ReturnsCorrectValue()
+        {
+            _dataAPI.CreateBalls(10);
+            int expectedAmount = 10;
+
+            int actualAmount = _dataAPI.GetBallAmount();
+
+            Assert.AreEqual(expectedAmount, actualAmount);
+        }
+
+        [TestMethod]
+        public void GetBallByID_ReturnsCorrectValue()
+        {
+            _dataAPI.CreateBalls(4);
+            int ballId = 1;
+            BallInterface expectedBall = _dataAPI.GetBallByID(ballId);
+
+            BallInterface actualBall = _dataAPI.GetBallByID(ballId);
+
+            Assert.AreEqual(expectedBall, actualBall);
+        }
+
+        [TestMethod]
+        public void CreateBalls_AddCorrectNubmerOfBalls()
+        {
+            int ballCount = 7;
+
+            _dataAPI.CreateBalls(ballCount);
+
+            int actualAmount = _dataAPI.GetBallAmount();
+            Assert.AreEqual(ballCount, actualAmount);
         }
     }
 }

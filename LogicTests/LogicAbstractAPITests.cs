@@ -1,6 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
 using System.Numerics;
-using System.Threading;
 using Data;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -10,109 +9,81 @@ namespace Logic.Tests
     public class LogicAbstractAPITests
     {
         [TestMethod]
-        public void CreateBalls_CreatesSpecifiedNumberOfBalls()
+        public void CreateLogicAPI_ShouldReturnInstanceOfLogicAPI()
         {
-            LogicAbstractAPI logicAPI = LogicAbstractAPI.CreateLogicAPI();
-            int ballCount = 5;
 
-            logicAPI.CreateBalls(ballCount);
+            int width = 800;
+            int height = 600;
 
-            Assert.AreEqual(ballCount, logicAPI.Balls.Count);
+            LogicAbstractAPI logicAPI = LogicAbstractAPI.CreateLogicAPI(width, height);
+
+            Assert.IsNotNull(logicAPI);
+            Assert.IsInstanceOfType(logicAPI, typeof(LogicAbstractAPI));
         }
 
         [TestMethod]
-        public void DeleteBalls_RemovesAllBalls()
+        public void CreateBalls_ShouldCreateSpecifiedNumberOfBalls()
         {
-            LogicAbstractAPI logicAPI = LogicAbstractAPI.CreateLogicAPI();
+
+            int width = 800;
+            int height = 600;
             int ballCount = 5;
+            LogicAbstractAPI logicAPI = LogicAbstractAPI.CreateLogicAPI(width, height);
+
+            logicAPI.CreateBalls(ballCount);
+            int actualBallCount = logicAPI.GetBallsAmount();
+
+            Assert.AreEqual(ballCount, actualBallCount);
+        }
+
+        [TestMethod]
+        public void DeleteBalls_ShouldRemoveAllBalls()
+        {
+
+            int width = 800;
+            int height = 600;
+            int ballCount = 5;
+            LogicAbstractAPI logicAPI = LogicAbstractAPI.CreateLogicAPI(width, height);
             logicAPI.CreateBalls(ballCount);
 
             logicAPI.DeleteBalls();
+            int actualBallCount = logicAPI.GetBallsAmount();
 
-            Assert.AreEqual(0, logicAPI.Balls.Count);
+            Assert.AreEqual(0, actualBallCount);
         }
 
         [TestMethod]
-        public void RunSimulation_StartsUpdatingBalls()
+        public void GetBallsAmount_ShouldReturnCorrectNumberOfBalls()
         {
-            LogicAbstractAPI logicAPI = LogicAbstractAPI.CreateLogicAPI();
+
+            int width = 800;
+            int height = 600;
             int ballCount = 5;
+            LogicAbstractAPI logicAPI = LogicAbstractAPI.CreateLogicAPI(width, height);
             logicAPI.CreateBalls(ballCount);
 
-            logicAPI.RunSimulation();
+            int actualBallCount = logicAPI.GetBallsAmount();
 
-
+            Assert.AreEqual(ballCount, actualBallCount);
         }
 
         [TestMethod]
-        public void StopSimulation_StopsUpdatingBalls()
+        public void GetBallRadiusByID_ShouldReturnCorrectDiameter()
         {
-            LogicAbstractAPI logicAPI = LogicAbstractAPI.CreateLogicAPI();
+
+            int width = 800;
+            int height = 600;
             int ballCount = 5;
+            LogicAbstractAPI logicAPI = LogicAbstractAPI.CreateLogicAPI(width, height);
             logicAPI.CreateBalls(ballCount);
-            logicAPI.RunSimulation();
+            int ballId = 2;
+            BallInterface ball = logicAPI.GetBall(ballId);
+            int expectedRadius = ball.Radius;
 
-            logicAPI.StopSimulation();
+            int actualRadius = logicAPI.GetBallRadiusByID(ballId);
 
+            Assert.AreEqual(expectedRadius, actualRadius);
         }
 
-
-        [TestMethod]
-        public void CollidesWith_ReturnsTrue_WhenBallsCollide()
-        {
-
-            BallData ballData1 = new BallData(new Vector2(0, 0), new Vector2(1, 0), 10, 1);
-            BallData ballData2 = new BallData(new Vector2(15, 0), new Vector2(-1, 0), 10, 1);
-            BallService ballService1 = new BallService(ballData1);
-            BallService ballService2 = new BallService(ballData2);
-
-            bool result = ballService1.CollidesWith(ballService2);
-
-            Assert.IsTrue(result);
-        }
-
-        [TestMethod]
-        public void CollidesWith_ReturnsFalse_WhenBallsDoNotCollide()
-        {
-
-            BallData ballData1 = new BallData(new Vector2(0, 0), new Vector2(1, 0), 10, 1);
-            BallData ballData2 = new BallData(new Vector2(30, 0), new Vector2(-1, 0), 10, 1);
-            BallService ballService1 = new BallService(ballData1);
-            BallService ballService2 = new BallService(ballData2);
-
-            bool result = ballService1.CollidesWith(ballService2);
-
-            Assert.IsFalse(result);
-        }
-
-        [TestMethod]
-        public void HandleCollision_ChangesVelocities_OnElasticCollision()
-        {
-
-            BallData ballData1 = new BallData(new Vector2(0, 0), new Vector2(1, 0), 10, 1);
-            BallData ballData2 = new BallData(new Vector2(15, 0), new Vector2(-1, 0), 10, 1);
-            BallService ballService1 = new BallService(ballData1);
-            BallService ballService2 = new BallService(ballData2);
-
-            ballService1.HandleCollision(ballService2);
-
-            Assert.AreEqual(new Vector2(-1, 0), ballService1.Velocity);
-            Assert.AreEqual(new Vector2(1, 0), ballService2.Velocity);
-        }
-
-        [TestMethod]
-        public void HandleCollision_NoChangeInVelocity_WhenBallsAreMovingApart()
-        {
-
-            BallData ballData1 = new BallData(new Vector2(0, 0), new Vector2(-1, 0), 10, 1);
-            BallData ballData2 = new BallData(new Vector2(15, 0), new Vector2(1, 0), 10, 1);
-            BallService ballService1 = new BallService(ballData1);
-            BallService ballService2 = new BallService(ballData2);
-
-            ballService1.HandleCollision(ballService2);
-
-            Assert.AreEqual(new Vector2(-1, 0), ballService1.Velocity);
-            Assert.AreEqual(new Vector2(1, 0), ballService2.Velocity);
-        }
     }
 }

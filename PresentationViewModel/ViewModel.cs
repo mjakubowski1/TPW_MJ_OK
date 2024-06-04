@@ -1,7 +1,9 @@
 ﻿using Data;
 using Logic;
+using PesentationModel;
 using PresentationModel;
 using System.Collections;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
 
@@ -12,9 +14,9 @@ namespace PresentationViewModel
 
         private readonly ModelAbstractAPI modelAPI;
         private int _ballsAmount;
-        private IList _balls;
-        private readonly int _width;
-        private readonly int _height;
+        private readonly int _width = 750;
+        private readonly int _height = 400;
+        public ObservableCollection<BallModel> BallsCollection { get; }
 
 
         public int BallsAmount
@@ -23,29 +25,17 @@ namespace PresentationViewModel
             set
             {
                 _ballsAmount = value;
-                RaisePropertyChanged("BallsAmount");
+                RaisePropertyChanged("AmountOfBalls");
             }
         }
 
-        public IList BallsList
-        {
-            get => _balls;
-            set
-            {
-                _balls = value;
-                RaisePropertyChanged("BallsList");
-            }
-        }
 
-        public ViewModel() : this(ModelAbstractAPI.CreateModelAPI()) { }
-        public ViewModel(ModelAbstractAPI modelAbstractAPI)
+        public ViewModel()
         {
-            modelAPI = ModelAbstractAPI.CreateModelAPI();
-            _height = modelAPI.Height;
-            _width = modelAPI.Width;
+            modelAPI = ModelAbstractAPI.CreateModelAPI(_width, _height);
             ClickButton = new RelayCommand(OnClickButton);
             ExitClick = new RelayCommand(OnExitClick);
-
+            BallsCollection = modelAPI.Balls;
         }
 
         public ICommand ClickButton { get; set; }
@@ -57,13 +47,13 @@ namespace PresentationViewModel
 
         private void OnClickButton()
         {
-            BallsList = modelAPI.CreateBalls(_ballsAmount);
-            modelAPI.CallSimulation();
+            modelAPI.AddBalls(BallsAmount);
         }
 
         private void OnExitClick()
         {
             modelAPI.StopSimulation();
+            BallsCollection.Clear();
         }
 
     }

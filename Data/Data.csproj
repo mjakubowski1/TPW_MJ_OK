@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Logger.cs~RF4345ff0.TMP" />
+  </ItemGroup>
+
 </Project>
