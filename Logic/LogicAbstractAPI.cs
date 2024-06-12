@@ -16,6 +16,7 @@ namespace Logic
             return new LogicAPI(w, h, data);
         }
 
+
         public abstract void CreateBalls(int count);
         public abstract void DeleteBalls();
         public abstract int GetBallsAmount();
@@ -37,12 +38,13 @@ namespace Logic
         public override event EventHandler<(int Id, float X, float Y, int Diameter)>? LogicEvent;
         private ConcurrentDictionary<(int, int), bool> _collisionFlags = new ConcurrentDictionary<(int, int), bool>();
         DataAbstractAPI _dataAPI;
-
+        private Logger logger;
         public LogicAPI(int w, int h, DataAbstractAPI? data)
         {
             BoardWidth = w;
             BoardHeight = h;
             _dataAPI = data != null ? data : DataAbstractAPI.CreateDataAPI(w, h);
+            logger = new Logger();
         }
 
         public override int BoardWidth { get; set; }
@@ -114,10 +116,8 @@ namespace Logic
 
         private void CheckBallCollision(BallInterface firstBall)
         {
-
             for (int i = 0; i < _dataAPI.GetBallAmount(); i++)
             {
-
                 BallInterface secondBall = _dataAPI.GetBallByID(i);
                 if (firstBall == secondBall)
                 {
@@ -127,7 +127,6 @@ namespace Logic
                 if (!HasCollisionBeenChecked(secondBall, firstBall) && IsCollision(firstBall, secondBall))
                 {
                     MarkCollisionAsChecked(firstBall, secondBall);
-
 
                     Vector2 newFirstBallVel = NewVelocity(firstBall, secondBall);
                     Vector2 newSecondBallVel = NewVelocity(secondBall, firstBall);
@@ -139,17 +138,14 @@ namespace Logic
                     firstBall.Velocity = newFirstBallVel;
                     secondBall.Velocity = newSecondBallVel;
 
-
-
+                    CollisionDataToSerialize collisionData = new CollisionDataToSerialize(firstBall.Id, secondBall.Id);
+                    logger.AddLogDataToQueue(collisionData);
                 }
                 else
                 {
                     RemoveCollisionFromChecked(secondBall, firstBall);
                 }
-
             }
-
-
         }
 
 
@@ -220,6 +216,7 @@ namespace Logic
             _dataAPI.RemoveBalls();
         }
 
+      
 
     }
 }

@@ -68,8 +68,17 @@ namespace Data
                     float ballY = (float)(_random.Next(15 + radius, BoardHeight - radius - 15) + _random.NextDouble());
 
                     BallData ball = new BallData(ballX, ballY, mass, vel, radius, i);
-                    ball.BallChanged += (object? sender, EventArgs args) => logger.AddBallToQueue((BallInterface)sender);
-                    _balls.Add(ball);
+                    //ball.BallChanged += (object? sender, EventArgs args) => logger.AddBallToQueue((BallInterface)sender);
+                    logger.AddLogDataToQueue(new BallDataToSerialize(new Vector2(ballX, ballY), mass, vel, radius, i));
+
+                    ball.BallChanged += (object? sender, EventArgs args) => logger.AddLogDataToQueue(new BallDataToSerialize(
+                        ((BallInterface)sender).Position,
+                        ((BallInterface)sender).Mass,
+                        ((BallInterface)sender).Velocity,
+                        ((BallInterface)sender).Radius,
+                        ((BallInterface)sender).Id
+                    ));
+                    _balls.Add(ball);  
                 }
             }
 
